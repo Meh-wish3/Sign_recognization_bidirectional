@@ -57,6 +57,8 @@ export default function App() {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoRef.current.srcObject = stream;
     setIsRunning(true);
+
+    startPredictionLoop();
   };
 
   const stopCamera = () => {
@@ -85,6 +87,27 @@ export default function App() {
     console.log(frame);
     setLastFrame(frame);
     setFrames(prev => [frame, ...prev].slice(0, 12));
+  };
+  const startPredictionLoop = () => {
+
+    setInterval(() => {
+
+      if (!videoRef.current || !canvasRef.current || !isRunning) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = 224;
+      canvas.height = 224;
+
+      ctx.drawImage(videoRef.current, 0, 0, 224, 224);
+
+      const frame = canvas.toDataURL("image/jpeg");
+
+      console.log("Auto Frame:", frame);
+
+    }, 300);
+
   };
 
   const card = {
