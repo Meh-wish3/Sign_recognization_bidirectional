@@ -47,6 +47,7 @@ const styles = `
 export default function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const loopRef = useRef(null);
   const [isRunning, setIsRunning] = useState(false);
   const [word, setWord] = useState("");
   const [sentence, setSentence] = useState("");
@@ -54,20 +55,44 @@ export default function App() {
   const [lastFrame, setLastFrame] = useState(null);
 
   const startCamera = async () => {
+
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoRef.current.srcObject = stream;
+
     setIsRunning(true);
 
-    startPredictionLoop();
+    loopRef.current = setInterval(() => {
+
+      if (!videoRef.current || !canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = 224;
+      canvas.height = 224;
+
+      ctx.drawImage(videoRef.current, 0, 0, 224, 224);
+
+      const frame = canvas.toDataURL("image/jpeg");
+
+      console.log("AUTO FRAME:", frame);
+
+    }, 300);
+
   };
 
   const stopCamera = () => {
+
     const tracks = videoRef.current.srcObject?.getTracks() || [];
     tracks.forEach(t => t.stop());
-    videoRef.current.srcObject = null;
-    setIsRunning(false);
-  };
 
+    videoRef.current.srcObject = null;
+
+    clearInterval(loopRef.current);
+
+    setIsRunning(false);
+
+  };
   const predict = async () => {
     if (!isRunning) return;
     const res = await fetch("https://YOUR-RENDER-BACKEND/predict");
