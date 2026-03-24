@@ -66,7 +66,6 @@ export default function App() {
       setIsRunning(true);
 
       loopRef.current = setInterval(() => {
-
         if (!videoRef.current || !canvasRef.current) return;
 
         const canvas = canvasRef.current;
@@ -80,6 +79,10 @@ export default function App() {
         const frame = canvas.toDataURL("image/jpeg");
 
         console.log("AUTO FRAME:", frame);
+
+        // ✅ Add these two lines:
+        setLastFrame(frame);
+        setFrames(prev => [frame, ...prev].slice(0, 12));
 
       }, 300);
 
