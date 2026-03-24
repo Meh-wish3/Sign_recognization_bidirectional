@@ -54,30 +54,36 @@ export default function App() {
   const [frames, setFrames] = useState([]);
   const [lastFrame, setLastFrame] = useState(null);
 
+
   const startCamera = async () => {
 
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoRef.current.srcObject = stream;
 
-    setIsRunning(true);
+    videoRef.current.onloadedmetadata = () => {
+      videoRef.current.play();
 
-    loopRef.current = setInterval(() => {
+      setIsRunning(true);
 
-      if (!videoRef.current || !canvasRef.current) return;
+      loopRef.current = setInterval(() => {
 
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+        if (!videoRef.current || !canvasRef.current) return;
 
-      canvas.width = 224;
-      canvas.height = 224;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
 
-      ctx.drawImage(videoRef.current, 0, 0, 224, 224);
+        canvas.width = 224;
+        canvas.height = 224;
 
-      const frame = canvas.toDataURL("image/jpeg");
+        ctx.drawImage(videoRef.current, 0, 0, 224, 224);
 
-      console.log("AUTO FRAME:", frame);
+        const frame = canvas.toDataURL("image/jpeg");
 
-    }, 300);
+        console.log("AUTO FRAME:", frame);
+
+      }, 300);
+
+    };
 
   };
 
@@ -112,27 +118,6 @@ export default function App() {
     console.log(frame);
     setLastFrame(frame);
     setFrames(prev => [frame, ...prev].slice(0, 12));
-  };
-  const startPredictionLoop = () => {
-
-    setInterval(() => {
-
-      if (!videoRef.current || !canvasRef.current || !isRunning) return;
-
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-
-      canvas.width = 224;
-      canvas.height = 224;
-
-      ctx.drawImage(videoRef.current, 0, 0, 224, 224);
-
-      const frame = canvas.toDataURL("image/jpeg");
-
-      console.log("Auto Frame:", frame);
-
-    }, 300);
-
   };
 
   const card = {
